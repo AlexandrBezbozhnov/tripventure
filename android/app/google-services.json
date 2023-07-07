@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "257698853188",
+    "project_id": "tripventure-d9717",
+    "storage_bucket": "tripventure-d9717.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:257698853188:android:8891baca79b9709d46a711",
+        "android_client_info": {
+          "package_name": "com.example.tripventure"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "257698853188-37bbc6s7a6tule5r59k3dpolfnp12ngc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlnmcioIHIDchA_pZXQxtJmCFfj2SejnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "257698853188-37bbc6s7a6tule5r59k3dpolfnp12ngc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "257698853188-2gso0ra49a02tiaavm1n8r41l4oebcjp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tripventure"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
