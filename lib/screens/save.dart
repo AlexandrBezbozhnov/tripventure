@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:tripventure/screens/account_screen.dart';
 import 'package:tripventure/screens/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 
 const apiKey = "5ae2e3f221c38a28845f05b6949649ad6d947533abcb8f5eb5fe0f52";
 const otmAPI = "https://api.opentripmap.com/0.1/en/places/";
@@ -89,32 +87,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
-appBar: AppBar(
+      appBar: AppBar(
         title: const Text('Главная страница'),
         actions: [
           IconButton(
             onPressed: () {
-              if ((user == null)) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AccountScreen()),
-                );
-              }
+              // Open login screen when the person icon is clicked.
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
             },
-            icon: Icon(
-              Icons.person,
-              color: (user == null) ? Colors.white : Colors.yellow,
-            ),
+            icon: Icon(Icons.person),
           ),
         ],
       ),
