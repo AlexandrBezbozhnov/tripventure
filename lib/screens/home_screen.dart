@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadList() async {
     String apiUrl =
-        "$otmAPI${"radius"}?apikey=$apiKey&radius=1000&limit=$pageLength&offset=$offset&lon=$lon&lat=$lat&rate=2&format=json";
+        "$otmAPI${"radius"}?apikey=$apiKey&radius=1000&limit=-1&lon=$lon&lat=$lat&rate=2&format=json";
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
@@ -80,6 +80,19 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Error during API request: ${response.reasonPhrase}');
     }
   }
+
+Future<Map<String, dynamic>> fetchAttractionDetails(String xid) async {
+  String apiUrl = "$otmAPI${"xid"}/$xid?apikey=$apiKey&format=json";
+  final response = await http.get(Uri.parse(apiUrl));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data;
+  } else {
+    throw Exception('Failed to fetch attraction details');
+  }
+}
+
 
   String getCountryName(String code) {
     // Replace this function with the logic to get the country name from the country code.
@@ -118,7 +131,7 @@ appBar: AppBar(
           ),
         ],
       ),
-      body: SafeArea(
+body: SafeArea(
         child: Column(
           children: [
             Padding(
@@ -151,67 +164,109 @@ appBar: AppBar(
               ),
             ),
             Text(
-                "${count.toString()} objects with description in a 1km radius"),
-            ElevatedButton(
-              onPressed: () {
-                offset += pageLength;
-                loadList();
-              },
-              child: Text("Next (${offset + pageLength} of $count)"),
+              "${attractions.length.toString()} objects with description in a 1km radius",
             ),
           ],
         ),
       ),
     );
   }
-
 String getCategoryName(dynamic kinds) {
-  if (kinds is List) {
-    // If kinds is a list, use the existing logic to map category codes to category names.
-    // Replace this logic with the appropriate mapping for your use case.
-    return "Category"; // Provide the fallback category name
-  } else if (kinds is String) {
-    // If kinds is a string, it represents the category name directly.
-    return kinds;
+  if (kinds is String) {
+    List<String> categoryCodes = kinds.split(',');
+    List<String> categoryNames = [];
+
+    for (String code in categoryCodes) {
+      // Map the category codes to their corresponding names using a mapping function
+      categoryNames.add(mapCategoryCodeToName(code));
+    }
+
+    return categoryNames.join(', '); // Join the category names with commas
   } else {
-    // If kinds is neither a list nor a string, provide a fallback category name.
-    return "Unknown";
+    return "Unknown"; // If kinds is not a string, provide a fallback category name
   }
 }
 
-  void onShowPOI(Map<String, dynamic> data) {
+// Helper function to map category codes to their corresponding names
+String mapCategoryCodeToName(String code) {
+  // Replace this mapping logic with the appropriate mapping for your use case
+  // For example, you can use a map to map category codes to category names.
+  // Here, we are providing a simple mapping for demonstration purposes.
+  if (code == "religion") {
+    return "Religion";
+  } else if (code == "architecture") {
+    return "Architecture";
+  } else if (code == "historic_architecture") {
+    return "Historic Architecture";
+  } else if (code == "other_temples") {
+    return "Other Temples";
+  } else if (code == "interesting_places") {
+    return "Interesting Places";
+  } else if (code == "destroyed_objects") {
+    return "Destroyed Objects";
+  } else {
+    return "Unknown Category";
+  }
+}
+
+
+void onShowPOI(Map<String, dynamic> data) {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(data['name']),
-          content: Column(
-            children: [
-              if (data['preview'] != null && data['preview']['source'] != null)
-                Image.network(data['preview']['source']),
-              Text(
-                data['wikipedia_extracts'] != null
-                    ? data['wikipedia_extracts']['html']
-                    : (data['descr'] != null
-                        ? data['descr']
-                        : "No description"),
-                textAlign: TextAlign.justify,
-              ),
-              if (data['otm'] != null)
-                TextButton(
-                  onPressed: () {},
-                  child: Text("Show more at OpenTripMap"),
+        return FutureBuilder<Map<String, dynamic>>(
+          future: fetchAttractionDetails(data['xid']),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return AlertDialog(
+                title: Text(data['name'] ?? 'Unknown'),
+                content: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError || snapshot.data == null) {
+              return AlertDialog(
+                title: Text(data['name'] ?? 'Unknown'),
+                content: Text("Error loading attraction details."),
+              );
+            } else {
+              final attractionDetails = snapshot.data!;
+              return AlertDialog(
+                title: Text(attractionDetails['name'] ?? data['name'] ?? 'Unknown'),
+                content: Column(
+                  children: [
+                    if (attractionDetails['preview'] != null &&
+                        attractionDetails['preview']['source'] != null)
+                      Image.network(attractionDetails['preview']['source']),
+                    if (attractionDetails['wikipedia_extracts'] != null &&
+                        attractionDetails['wikipedia_extracts']['html'] != null)
+                      Text(
+                        attractionDetails['wikipedia_extracts']['html'],
+                        textAlign: TextAlign.justify,
+                      )
+                    else if (attractionDetails['descr'] != null)
+                      Text(
+                        attractionDetails['descr'],
+                        textAlign: TextAlign.justify,
+                      )
+                    else
+                      Text("No description"),
+                    if (attractionDetails['otm'] != null)
+                      TextButton(
+                        onPressed: () {},
+                        child: Text("Show more at OpenTripMap"),
+                      ),
+                  ],
                 ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Close"),
-            ),
-          ],
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("Close"),
+                  ),
+                ],
+              );
+            }
+          },
         );
       },
     );
