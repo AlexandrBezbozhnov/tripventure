@@ -8,41 +8,35 @@ import 'package:tripventure/screens/signup_screen.dart';
 import 'package:tripventure/screens/verify_email_screen.dart';
 import 'package:tripventure/services/firebase_streem.dart';
 
-// Firebase Авторизация - Сценарии:
-//    Войти - Почта / Пароль
-//    Личный кабинет
-//    Зарегистрироваться - Почта / Пароль два раза
-//        Подтвердить почту - Отправить письмо снова / Отменить
-//    Сбросить пароль - Почта
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+ Future<void> main() async {
+WidgetsFlutterBinding.ensureInitialized();
+await Firebase.initializeApp();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        pageTransitionsTheme: const PageTransitionsTheme(builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-        }),
-      ),
-      routes: {
-        '/': (context) => const FirebaseStream(),
-        '/home': (context) => const HomeScreen(),
-        '/account': (context) => const AccountScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignUpScreen(),
-        '/reset_password': (context) => const ResetPasswordScreen(),
-        '/verify_email': (context) => const VerifyEmailScreen(),
-      },
-      initialRoute: '/',
-    );
-  }
+// Получаем текущую тему телефона
+final systemTheme = WidgetsBinding.instance.window.platformBrightness;
+
+// Назначем тему приложения в зависимости от текущей темы телефона
+runApp(
+MaterialApp(
+debugShowCheckedModeBanner: false,
+theme: ThemeData(
+pageTransitionsTheme: const PageTransitionsTheme(builders: {
+TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+}),
+brightness: systemTheme == Brightness.light ? Brightness.light : Brightness.dark,
+),
+routes: {
+'/': (context) => const FirebaseStream(),
+'/home': (context) => const HomeScreen(),
+'/account': (context) => const AccountScreen(),
+'/login': (context) => const LoginScreen(),
+'/signup': (context) => const SignUpScreen(),
+'/reset_password': (context) => const ResetPasswordScreen(),
+'/verify_email': (context) => const VerifyEmailScreen(),
+},
+initialRoute: '/',
+),
+);
 }
