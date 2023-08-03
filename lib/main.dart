@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:tripventure/screens/account_screen.dart';
-import 'package:tripventure/screens/home_screen.dart';
+import 'package:tripventure/screens/home/home_screen.dart';
 import 'package:tripventure/screens/login_screen.dart';
 import 'package:tripventure/screens/reset_password_screen.dart';
 import 'package:tripventure/screens/signup_screen.dart';

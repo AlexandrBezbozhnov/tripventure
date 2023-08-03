@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tripventure/screens/home_screen.dart';
+import 'package:tripventure/screens/home/home_screen.dart';
 import 'package:tripventure/services/snack_bar.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
