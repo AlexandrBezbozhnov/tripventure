@@ -1,5 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tripventure/screens/account/account_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -10,14 +11,7 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final user = FirebaseAuth.instance.currentUser;
-
-  Future<void> signOut() async {
-    final navigator = Navigator.of(context);
-
-    await FirebaseAuth.instance.signOut();
-
-    navigator.pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-  }
+  final AccountBackEnd accountBackEnd = AccountBackEnd(); // Создаем экземпляр класса бэк-энда
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +23,15 @@ class _AccountScreenState extends State<AccountScreen> {
             Navigator.pop(context);
           },
           icon: const Icon(
-            Icons.arrow_back_ios, // add custom icons also
+            Icons.arrow_back_ios, // Добавьте кастомные иконки при необходимости
           ),
         ),
         title: const Text('Аккаунт'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Open shopping cart',
-            onPressed: () => signOut(),
+            tooltip: 'Открыть корзину покупок',
+            onPressed: () => accountBackEnd.signOutAndNavigateToHome(context),
           ),
         ],
       ),
@@ -47,7 +41,7 @@ class _AccountScreenState extends State<AccountScreen> {
           children: [
             Text('Ваш Email: ${user?.email}'),
             TextButton(
-              onPressed: () => signOut(),
+              onPressed: () => accountBackEnd.signOutAndNavigateToHome(context),
               child: const Text('Выйти'),
             ),
           ],

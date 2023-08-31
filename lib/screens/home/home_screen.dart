@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tripventure/screens/home/home_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:tripventure/screens/account_screen.dart';
-import 'package:tripventure/screens/login_screen.dart';
+import 'package:tripventure/screens/account/account_screen.dart';
+import 'package:tripventure/screens/login/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
@@ -106,11 +106,12 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(
               Icons.person,
-              color: (user == null) ? Colors.white : Colors.yellow,
+              color: (user == null) ? Colors.white : Colors.blue,
             ),
           ),
         ],
       ),
+      
       body: SafeArea(
         child: Column(
           children: [

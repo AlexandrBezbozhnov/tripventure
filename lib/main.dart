@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tripventure/screens/account_screen.dart';
+import 'package:tripventure/screens/account/account_screen.dart';
 import 'package:tripventure/screens/home/home_screen.dart';
-import 'package:tripventure/screens/login_screen.dart';
-import 'package:tripventure/screens/reset_password_screen.dart';
-import 'package:tripventure/screens/signup_screen.dart';
-import 'package:tripventure/screens/verify_email_screen.dart';
+import 'package:tripventure/screens/login/login_screen.dart';
+import 'package:tripventure/screens/login/reset_password_screen.dart';
+import 'package:tripventure/screens/login/signup_screen.dart';
+import 'package:tripventure/screens/login/verify_email_screen.dart';
 import 'package:tripventure/services/firebase_streem.dart';
 
 Future<void> main() async {
