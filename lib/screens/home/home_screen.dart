@@ -17,8 +17,47 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> attractions = [];
   int selectedDistance = 1000;
   final List<int> distances = [1000, 2000, 5000, 10000];
-  TextEditingController searchController = TextEditingController(); // Добавление контроллера текстового поля
+  TextEditingController searchController =
+      TextEditingController(); // Добавление контроллера текстового поля
 
+  void clearAttractions() {
+    setState(() {
+      attractions.clear();
+    });
+  }
+
+  String getCategoryName(dynamic kinds) {
+    if (kinds is String) {
+      List<String> categoryCodes = kinds.split(',');
+      List<String> categoryNames = [];
+
+      for (String code in categoryCodes) {
+        categoryNames.add(mapCategoryCodeToName(code));
+      }
+
+      return categoryNames.join(', ');
+    } else {
+      return "Unknown";
+    }
+  }
+
+  String mapCategoryCodeToName(String code) {
+    if (code == "religion") {
+      return "Religion";
+    } else if (code == "architecture") {
+      return "Architecture";
+    } else if (code == "historic_architecture") {
+      return "Historic Architecture";
+    } else if (code == "other_temples") {
+      return "Other Temples";
+    } else if (code == "interesting_places") {
+      return "Interesting Places";
+    } else if (code == "destroyed_objects") {
+      return "Destroyed Objects";
+    } else {
+      return "Unknown Category";
+    }
+  }
 
   void onShowPOI(Map<String, dynamic> data) {
     // Call the backend function to show the POI details
@@ -105,7 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AccountScreen()),
+                    builder: (context) => const AccountScreen(),
+                  ),
                 );
               }
             },
@@ -117,107 +157,95 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller:
-                          searchController, // Использование контроллера для текстового поля
-                      decoration: InputDecoration(
-                        labelText: 'Поиск города',
-                        border: OutlineInputBorder(),
-                      ),
+                  // Ваш текущий код здесь
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              labelText: 'Поиск города',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            String query = searchController.text;
+                            searchCities(query);
+                          },
+                          child: Text('Поиск'),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      String query = searchController
-                          .text; // Получение значения из текстового поля
-                      searchCities(query); // Выполнить поиск
-                    },
-                    child: Text('Поиск'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: DropdownButton<int>(
+                      value: selectedDistance,
+                      onChanged: (newValue) {
+                        setState(() {
+                          selectedDistance = newValue!;
+                          firstLoad();
+                        });
+                      },
+                      items: distances.map((distance) {
+                        return DropdownMenuItem<int>(
+                          value: distance,
+                          child: Text('$distance м'),
+                        );
+                      }).toList(),
+                    ),
                   ),
+                  if (attractions
+                      .isNotEmpty) // Проверка наличия результатов поиска
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: attractions.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(attractions[index]['name'] ?? 'Unknown'),
+                          subtitle: Text(
+                            getCategoryName(attractions[index]['kinds']) ??
+                                'Unknown',
+                          ),
+                          onTap: () {
+                            onShowPOI(attractions[index]);
+                          },
+                        );
+                      },
+                    ),
+                  SizedBox(height: 16), // Отступ для пространства внизу
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: DropdownButton<int>(
-                value: selectedDistance,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedDistance = newValue!;
-                    firstLoad();
-                  });
-                },
-                items: distances.map((distance) {
-                  return DropdownMenuItem<int>(
-                    value: distance,
-                    child: Text('$distance м'),
-                  );
-                }).toList(),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: attractions.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(attractions[index]['name'] ?? 'Unknown'),
-                    subtitle: Text(
-                        getCategoryName(attractions[index]['kinds']) ??
-                            'Unknown'),
-                    onTap: () {
-                      onShowPOI(attractions[index]);
+            if (attractions
+                .isNotEmpty) // Условие показа кнопки "Закрыть список"
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      clearAttractions(); // Вызов метода для очистки результатов поиска
                     },
-                  );
-                },
+                    child: Text('Закрыть список'),
+                  ),
+                ),
               ),
-            ),
-            Text(
-              "${attractions.length.toString()} объектов с описанием в радиусе $selectedDistance м",
-            ),
           ],
         ),
       ),
     );
-  }
-
-  String getCategoryName(dynamic kinds) {
-    if (kinds is String) {
-      List<String> categoryCodes = kinds.split(',');
-      List<String> categoryNames = [];
-
-      for (String code in categoryCodes) {
-        categoryNames.add(mapCategoryCodeToName(code));
-      }
-
-      return categoryNames.join(', ');
-    } else {
-      return "Unknown";
-    }
-  }
-
-  String mapCategoryCodeToName(String code) {
-    if (code == "religion") {
-      return "Religion";
-    } else if (code == "architecture") {
-      return "Architecture";
-    } else if (code == "historic_architecture") {
-      return "Historic Architecture";
-    } else if (code == "other_temples") {
-      return "Other Temples";
-    } else if (code == "interesting_places") {
-      return "Interesting Places";
-    } else if (code == "destroyed_objects") {
-      return "Destroyed Objects";
-    } else {
-      return "Unknown Category";
-    }
   }
 }
