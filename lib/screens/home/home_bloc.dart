@@ -86,4 +86,3 @@ void showPOIDetails(BuildContext context, Map<String, dynamic> data) {
   );
 }
 
-// ... Other backend methods if any ...

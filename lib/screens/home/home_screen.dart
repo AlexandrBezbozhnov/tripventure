@@ -6,7 +6,6 @@ import 'package:tripventure/screens/account/account_screen.dart';
 import 'package:tripventure/screens/login/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -16,10 +15,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> attractions = [];
+  int selectedDistance = 1000;
+  final List<int> distances = [1000, 2000, 5000, 10000];
+  TextEditingController searchController = TextEditingController(); // Добавление контроллера текстового поля
+
+
   void onShowPOI(Map<String, dynamic> data) {
     // Call the backend function to show the POI details
     showPOIDetails(context, data);
   }
+
   Future<void> searchCities(String query) async {
     String apiUrl = "$otmAPI${"geoname"}?apikey=$apiKey&name=$query";
     final response = await http.get(Uri.parse(apiUrl));
@@ -42,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> firstLoad() async {
     String apiUrl =
-        "$otmAPI${"radius"}?apikey=$apiKey&radius=1000&limit=$pageLength&offset=$offset&lon=$lon&lat=$lat&rate=2&format=count";
+        "$otmAPI${"radius"}?apikey=$apiKey&radius=$selectedDistance&limit=$pageLength&offset=$offset&lon=$lon&lat=$lat&rate=2&format=count";
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
@@ -59,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadList() async {
     String apiUrl =
-        "$otmAPI${"radius"}?apikey=$apiKey&radius=1000&limit=-1&lon=$lon&lat=$lat&rate=2&format=json";
+        "$otmAPI${"radius"}?apikey=$apiKey&radius=$selectedDistance&limit=-1&lon=$lon&lat=$lat&rate=2&format=json";
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
@@ -106,26 +111,56 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(
               Icons.person,
-              color: (user == null) ? Colors.white : Colors.blue,
+              color: (user == null) ? Colors.black : Colors.blue,
             ),
           ),
         ],
       ),
-      
       body: SafeArea(
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                onSubmitted: (value) {
-                  searchCities(value);
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller:
+                          searchController, // Использование контроллера для текстового поля
+                      decoration: InputDecoration(
+                        labelText: 'Поиск города',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      String query = searchController
+                          .text; // Получение значения из текстового поля
+                      searchCities(query); // Выполнить поиск
+                    },
+                    child: Text('Поиск'),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: DropdownButton<int>(
+                value: selectedDistance,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedDistance = newValue!;
+                    firstLoad();
+                  });
                 },
-                decoration: InputDecoration(
-                  labelText: 'Поиск города',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(),
-                ),
+                items: distances.map((distance) {
+                  return DropdownMenuItem<int>(
+                    value: distance,
+                    child: Text('$distance м'),
+                  );
+                }).toList(),
               ),
             ),
             Expanded(
@@ -135,7 +170,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   return ListTile(
                     title: Text(attractions[index]['name'] ?? 'Unknown'),
                     subtitle: Text(
-                        getCategoryName(attractions[index]['kinds']) ?? 'Unknown'),
+                        getCategoryName(attractions[index]['kinds']) ??
+                            'Unknown'),
                     onTap: () {
                       onShowPOI(attractions[index]);
                     },
@@ -144,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              "${attractions.length.toString()} objects with description in a 1km radius",
+              "${attractions.length.toString()} объектов с описанием в радиусе $selectedDistance м",
             ),
           ],
         ),
