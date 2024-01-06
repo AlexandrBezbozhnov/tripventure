@@ -19,6 +19,12 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<int> distances = [1000, 2000, 5000, 10000];
   TextEditingController searchController =
       TextEditingController(); // Добавление контроллера текстового поля
+  List<bool> isSelected = [
+    true,
+    false,
+    false,
+    false
+  ]; // Список для выбора расстояния
 
   void clearAttractions() {
     setState(() {
@@ -178,34 +184,47 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            String query = searchController.text;
-                            searchCities(query);
-                          },
-                          child: Text('Поиск'),
-                        ),
+                        IconButton(
+                      onPressed: () {
+                        String query = searchController.text;
+                        searchCities(query);
+                      },
+                      icon: Icon(Icons.search),
+                    ),
                       ],
                     ),
                   ),
-                  Padding(
+                  Center(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: DropdownButton<int>(
-                      value: selectedDistance,
-                      onChanged: (newValue) {
+                    child: ToggleButtons(
+                      children: distances.map((distance) {
+                        return Text('$distance м');
+                      }).toList(),
+                      isSelected: isSelected,
+                      onPressed: (int index) {
                         setState(() {
-                          selectedDistance = newValue!;
-                          firstLoad();
+                          for (int i = 0; i < isSelected.length; i++) {
+                            if (i == index) {
+                              isSelected[i] = true;
+                              selectedDistance = distances[i];
+                            } else {
+                              isSelected[i] = false;
+                            }
+                          }
                         });
                       },
-                      items: distances.map((distance) {
-                        return DropdownMenuItem<int>(
-                          value: distance,
-                          child: Text('$distance м'),
-                        );
-                      }).toList(),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      selectedBorderColor: Colors.black,
+                      selectedColor: Colors.white,
+                      fillColor: Colors.grey,
+                      color: Colors.black,
+                      constraints: const BoxConstraints(
+                        minHeight: 40.0,
+                        minWidth: 80.0,
+                      ),
                     ),
-                  ),
+                  ),),
                   if (attractions
                       .isNotEmpty) // Проверка наличия результатов поиска
                     ListView.builder(
